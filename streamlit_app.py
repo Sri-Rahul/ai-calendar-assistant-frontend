@@ -536,35 +536,7 @@ def main():
         })
     
     # Footer with helpful information
-    with st.expander("💡 Tips & Examples", expanded=False):
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            st.markdown("""
-            **📅 Booking Examples:**
-            - "Schedule a meeting tomorrow at 3 PM"
-            - "Book a 30-minute call with john@example.com"
-            - "I need a 2-hour workshop next Friday"
-            - "Set up a quick sync for today"
-            """)
-        
-        with col2:
-            st.markdown("""
-            **🔍 Availability Examples:**
-            - "What's my availability today?"
-            - "Check my calendar for tomorrow"
-            - "Do you have any free time this week?"
-            - "Show me available slots for Friday"
-            """)
-        
-        st.markdown("""
-        **💡 Pro Tips:**
-        - Be specific about duration (30 minutes, 1 hour, etc.)
-        - Mention date preferences (today, tomorrow, next week)
-        - Include attendee emails when needed
-        - Use natural language - I understand context!
-        - **Generic Times**: Say "afternoon" (2 PM), "morning" (10 AM), "evening" (6 PM)
-        """)
+    # (Tips & Examples section removed)
 
 if __name__ == "__main__":
     main()
