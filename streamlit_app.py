@@ -4,6 +4,7 @@ import json
 from datetime import datetime
 from typing import Dict, List
 import os
+import pytz
 
 # Page configuration
 st.set_page_config(
@@ -51,13 +52,21 @@ def init_session_state():
     if "confirmation_pending" not in st.session_state:
         st.session_state.confirmation_pending = None
 
+def get_ist_time() -> datetime:
+    """Get current time in IST"""
+    ist_tz = pytz.timezone('Asia/Kolkata')
+    utc_now = datetime.utcnow()
+    return utc_now.replace(tzinfo=pytz.UTC).astimezone(ist_tz).replace(tzinfo=None)
+
 def send_message_to_backend(message: str) -> Dict:
     """Send message to FastAPI backend"""
     try:
+        # FIXED: Use IST timestamp
+        ist_time = get_ist_time()
         payload = {
             "role": "user",
             "content": message,
-            "timestamp": datetime.now().isoformat()
+            "timestamp": ist_time.isoformat()  # FIXED: IST timestamp
         }
         
         response = requests.post(
@@ -151,11 +160,14 @@ def process_pending_time_selection():
         
         print(f"🔄 Processing time selection: {time_slot}")
         
+        # FIXED: Use IST timestamp
+        ist_time = get_ist_time()
+        
         # Add user selection to messages
         st.session_state.messages.append({
             "role": "user",
             "content": time_slot,
-            "timestamp": datetime.now(),
+            "timestamp": ist_time,  # FIXED: IST timestamp
             "is_time_selection": True
         })
         
@@ -166,7 +178,7 @@ def process_pending_time_selection():
         st.session_state.messages.append({
             "role": "assistant",
             "content": response["message"],
-            "timestamp": datetime.now(),
+            "timestamp": ist_time,  # FIXED: IST timestamp
             "booking_data": response.get("booking_data"),
             "suggested_times": response.get("suggested_times", []),
             "requires_confirmation": response.get("requires_confirmation", False)
@@ -218,10 +230,13 @@ def process_pending_confirmation():
         
         print(f"🔄 Processing confirmation: {user_message}")
         
+        # FIXED: Use IST timestamp
+        ist_time = get_ist_time()
+        
         st.session_state.messages.append({
             "role": "user",
             "content": user_message,
-            "timestamp": datetime.now(),
+            "timestamp": ist_time,  # FIXED: IST timestamp
             "is_confirmation": True
         })
         
@@ -229,7 +244,7 @@ def process_pending_confirmation():
         st.session_state.messages.append({
             "role": "assistant",
             "content": response["message"],
-            "timestamp": datetime.now(),
+            "timestamp": ist_time,  # FIXED: IST timestamp
             "booking_data": response.get("booking_data"),
             "suggested_times": response.get("suggested_times", []),
             "requires_confirmation": response.get("requires_confirmation", False)
@@ -455,7 +470,8 @@ def main():
                             ts = datetime.fromisoformat(message["timestamp"].replace('Z', '+00:00'))
                         else:
                             ts = message["timestamp"]
-                        st.caption(f"🕐 {ts.strftime('%I:%M %p')}")
+                        # FIXED: Show IST timezone
+                        st.caption(f"🕐 {ts.strftime('%I:%M %p')} IST")
                     except:
                         pass
                 
@@ -482,17 +498,20 @@ def main():
     
     # Chat input
     if prompt := st.chat_input("Type your message here... (e.g., 'Schedule a meeting tomorrow at 3 PM')"):
+        # FIXED: Use IST timestamp
+        ist_time = get_ist_time()
+        
         # Add user message to chat
         st.session_state.messages.append({
             "role": "user",
             "content": prompt,
-            "timestamp": datetime.now()
+            "timestamp": ist_time  # FIXED: IST timestamp
         })
         
         # Display user message immediately
         with st.chat_message("user"):
             st.markdown(prompt)
-            st.caption(f"🕐 {datetime.now().strftime('%I:%M %p')}")
+            st.caption(f"🕐 {ist_time.strftime('%I:%M %p')} IST")  # FIXED: Show IST
         
         # Get response from backend
         with st.chat_message("assistant"):
@@ -529,7 +548,7 @@ def main():
         st.session_state.messages.append({
             "role": "assistant",
             "content": response["message"],
-            "timestamp": datetime.now(),
+            "timestamp": ist_time,  # FIXED: IST timestamp
             "booking_data": response.get("booking_data"),
             "suggested_times": response.get("suggested_times", []),
             "requires_confirmation": response.get("requires_confirmation", False)
