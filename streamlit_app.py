@@ -356,34 +356,6 @@ def main():
     
     # Sidebar
     with st.sidebar:
-        st.header("⚙️ Settings")
-        
-        # Backend URL configuration
-        new_backend_url = st.text_input(
-            "Backend URL",
-            value=st.session_state.backend_url,
-            help="URL of the FastAPI backend"
-        )
-        
-        if new_backend_url != st.session_state.backend_url:
-            st.session_state.backend_url = new_backend_url
-        
-        # Health check
-        if st.button("🔍 Test Connection"):
-            try:
-                response = requests.get(f"{st.session_state.backend_url}/health", timeout=5)
-                if response.status_code == 200:
-                    st.success("✅ Backend connected!")
-                    health_data = response.json()
-                    with st.expander("Health Details"):
-                        st.json(health_data)
-                else:
-                    st.error("❌ Backend connection failed")
-            except Exception as e:
-                st.error(f"❌ Cannot reach backend: {str(e)}")
-        
-        st.divider()
-        
         # Quick actions
         st.header("⚡ Quick Actions")
         
